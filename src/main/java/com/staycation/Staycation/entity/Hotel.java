@@ -42,7 +42,7 @@ public class Hotel {
     @Column(nullable = false)
     private  Boolean active;
 
-    @OneToMany(mappedBy = "hotel")
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Room> rooms;
 
 

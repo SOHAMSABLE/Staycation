@@ -1,35 +1,29 @@
 package com.staycation.Staycation.entity;
-import com.staycation.Staycation.entity.enums.Role;
+
+import com.staycation.Staycation.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Set;
-
 @Entity
 @Getter
 @Setter
-@Table(name = "App_user")
-public class User {
+
+public class Guest {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
-    private String email;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Column(nullable = false)
-    private String password;
-
     private String name;
 
-    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+    private Gender gender;
 
-
-
-
-
-
+    private Integer age;
 }

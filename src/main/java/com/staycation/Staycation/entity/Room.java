@@ -1,5 +1,4 @@
 package com.staycation.Staycation.entity;
-import com.staycation.Staycation.entity.Hotel;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,7 +17,7 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-   @ManyToOne
+   @ManyToOne(fetch = FetchType.LAZY)
    @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
@@ -45,5 +44,5 @@ public class Room {
     private  Integer totalCount;
 
     @Column(nullable = false)
-    private  Integer Capacity;
+    private  Integer capacity;
 }
