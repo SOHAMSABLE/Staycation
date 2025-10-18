@@ -9,7 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 @Embeddable
-@Table(name = "hotel_contact_info")
 public class HotelContactInfo {
 
     private String address;

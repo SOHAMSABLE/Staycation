@@ -1,8 +1,11 @@
 package com.staycation.Staycation.entity.enums;
 
 public enum BookingStatus {
-    CONFIRMED,
     RESERVED,
-    CANCELLED
+    GUESTS_ADDED,
+    PAYMENTS_PENDING,
+    CONFIRMED,
+    CANCELLED,
+    EXPIRED
 
 }
