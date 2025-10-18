@@ -5,6 +5,7 @@ import com.staycation.Staycation.entity.Hotel;
 import com.staycation.Staycation.entity.Room;
 import com.staycation.Staycation.exception.ResourceNotFoundException;
 import com.staycation.Staycation.repository.HotelRepository;
+import com.staycation.Staycation.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @RequiredArgsConstructor
 public class HotelServiceImpl implements HotelService {
+    private final RoomRepository roomRepository;
 
     private final HotelRepository hotelRepository;
     private  final ModelMapper modelMapper;
@@ -22,13 +24,25 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public HotelDto createNewHotel(HotelDto hotelDto) {
-        log.info("Creating a new hotel with name:{}",hotelDto.getName());
-        Hotel hotel = modelMapper.map(hotelDto,Hotel.class);
-        hotel.setActive(false);
+        log.info("Creating a new hotel with name: {}", hotelDto.getName());
+
+        // Map DTO to entity, respect 'active' value from JSON
+        Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
+
+        // Save hotel
         hotel = hotelRepository.save(hotel);
-        log.info("Created a new hotel with ID: {} ",hotelDto.getId());
+        log.info("Created a new hotel with ID: {}", hotel.getId());
+
+        // If hotel is active and has rooms already (optional, mostly for updates)
+        if (hotel.getActive() && hotel.getRooms() != null) {
+            for (Room room : hotel.getRooms()) {
+                inventoryService.initializeRoomForAYear(room);
+            }
+        }
+
         return modelMapper.map(hotel, HotelDto.class);
     }
+
 
     @Override
     public HotelDto getHotelById(Long id) {
@@ -60,10 +74,12 @@ public class HotelServiceImpl implements HotelService {
                 .orElseThrow(()-> new ResourceNotFoundException("Hotel not found with ID:"+id));
 
 
-        hotelRepository.deleteById(id);
         for (Room room : hotel.getRooms()){
             inventoryService.deleteFutureInventories(room);
+            roomRepository.deleteById(room.getId());
         }
+
+        hotelRepository.deleteById(id);
     }
 
     @Override

@@ -26,22 +26,27 @@ public class RoomServiceImpl implements  RoomService{
     private final ModelMapper modelMapper;
 
     @Override
-    public RoomDto createNewRoom(Long hotelID,RoomDto roomDto) {
-      log.info("Creating a new room in hotel with ID: {}",hotelID);
-        Hotel hotel= hotelRepository
-                .findById(hotelID)
-                .orElseThrow(()->new ResourceNotFoundException("Hotel not found with ID:"+hotelID));
-      Room room = modelMapper.map(roomDto, Room.class);
-       room.setHotel(hotel);
-       room = roomRepository.save(room);
+    public RoomDto createNewRoom(Long hotelID, RoomDto roomDto) {
+        log.info("Creating a new room in hotel with ID: {}", hotelID);
 
-       if(hotel.getActive()){
-           inventoryService.initializeRoomForAYear(room);
-       }
+        Hotel hotel = hotelRepository.findById(hotelID)
+                .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: " + hotelID));
 
+        // Map DTO to entity
+        Room room = modelMapper.map(roomDto, Room.class);
+        room.setHotel(hotel);
 
-       return modelMapper.map(room , RoomDto.class);
+        // Save room
+        room = roomRepository.save(room);
+
+        // Automatically initialize inventory if hotel is active
+        if (hotel.getActive()) {
+            inventoryService.initializeRoomForAYear(room);
+        }
+
+        return modelMapper.map(room, RoomDto.class);
     }
+
 
     @Override
     public List<RoomDto> getAllRoomInHotel(Long hotelId) {
