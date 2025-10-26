@@ -1,6 +1,5 @@
 package com.staycation.Staycation.service;
-
-import com.staycation.Staycation.dto.HotelDto;
+import com.staycation.Staycation.dto.HotelPriceDto;
 import com.staycation.Staycation.dto.HotelSearchRequest;
 import com.staycation.Staycation.entity.Room;
 import org.springframework.data.domain.Page;
@@ -11,6 +10,6 @@ public interface InventoryService {
 
     void  deleteFutureInventories(Room room);
 
-    Page<HotelDto> searchHotels(HotelSearchRequest hotelSearchRequest);
+    Page<HotelPriceDto> searchHotels(HotelSearchRequest hotelSearchRequest);
 
 }
