@@ -1,5 +1,6 @@
 package com.staycation.Staycation.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -48,6 +49,7 @@ public class Hotel {
 
 
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Room> rooms;
 
 
