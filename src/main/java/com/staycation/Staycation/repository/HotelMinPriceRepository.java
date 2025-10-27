@@ -12,14 +12,11 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.Optional;
 
-
 @Repository
 public interface HotelMinPriceRepository extends JpaRepository<HotelMinPrice, Long> {
 
     @Query("""
-            SELECT new com.staycation.Staycation.dto.HotelPriceDto(i.hotel, AVG(i.price))
             FROM HotelMinPrice i
-            WHERE i.hotel.city = :city
                 AND i.date BETWEEN :startDate AND :endDate
                 AND i.hotel.active = true
            GROUP BY i.hotel
