@@ -16,11 +16,14 @@ import java.util.Optional;
 public interface HotelMinPriceRepository extends JpaRepository<HotelMinPrice, Long> {
 
     @Query("""
-            FROM HotelMinPrice i
-                AND i.date BETWEEN :startDate AND :endDate
-                AND i.hotel.active = true
-           GROUP BY i.hotel
-           """)
+    SELECT new com.staycation.Staycation.dto.HotelPriceDto(i.hotel, AVG(i.price))
+    FROM HotelMinPrice i
+    WHERE i.hotel.city = :city
+      AND i.date BETWEEN :startDate AND :endDate
+      AND i.hotel.active = true
+    GROUP BY i.hotel
+""")
+
     Page<HotelPriceDto> findHotelsWithAvailableInventory(
             @Param("city") String city,
             @Param("startDate") LocalDate startDate,

@@ -29,6 +29,9 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public HotelDto createNewHotel(HotelDto hotelDto) {
         log.info("Creating a new hotel with name: {}", hotelDto.getName());
+        if (hotelDto.getActive() == null) {
+            hotelDto.setActive(false);
+        }
 
         // Map DTO to entity, respect 'active' value from JSON
         Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
