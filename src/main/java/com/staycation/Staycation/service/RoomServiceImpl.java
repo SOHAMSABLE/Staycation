@@ -3,13 +3,16 @@ package com.staycation.Staycation.service;
 import com.staycation.Staycation.dto.RoomDto;
 import com.staycation.Staycation.entity.Hotel;
 import com.staycation.Staycation.entity.Room;
+import com.staycation.Staycation.entity.User;
 import com.staycation.Staycation.exception.ResourceNotFoundException;
+import com.staycation.Staycation.exception.UnAuthorisedException;
 import com.staycation.Staycation.repository.HotelRepository;
 import com.staycation.Staycation.repository.RoomRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +34,10 @@ public class RoomServiceImpl implements  RoomService{
 
         Hotel hotel = hotelRepository.findById(hotelID)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with ID: " + hotelID));
+        User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.equals(hotel.getOwner())){
+            throw  new UnAuthorisedException("This user does not own this hotel with id"+ hotelID);
+        }
 
         // Map DTO to entity
         Room room = modelMapper.map(roomDto, Room.class);
@@ -76,6 +83,10 @@ public class RoomServiceImpl implements  RoomService{
         Room room= roomRepository
                 .findById(roomId)
                 .orElseThrow(()->new ResourceNotFoundException("Room not found with ID:"+roomId));
+        User user =(User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (user.equals(room.getHotel().getOwner())){
+            throw  new UnAuthorisedException("This user does not own this hotel with id"+ roomId);
+        }
         roomRepository.deleteById(roomId);
         inventoryService.deleteFutureInventories(room);
 
