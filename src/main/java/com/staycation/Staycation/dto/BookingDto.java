@@ -6,6 +6,7 @@ import com.staycation.Staycation.entity.User;
 import com.staycation.Staycation.entity.enums.BookingStatus;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 @Data
@@ -26,4 +27,6 @@ public class BookingDto {
     private BookingStatus bookingStatus;
 
     private Set<GuestDto> guests;
+
+    private BigDecimal amount;
 }
