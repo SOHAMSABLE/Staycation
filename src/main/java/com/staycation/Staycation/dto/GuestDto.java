@@ -5,6 +5,8 @@ import com.staycation.Staycation.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.Data;
 
+import java.time.LocalDate;
+
 @Data
 
 public class GuestDto {
@@ -18,4 +20,6 @@ public class GuestDto {
     private Gender gender;
 
     private Integer age;
+
+    private LocalDate dateOfBirth;
 }
