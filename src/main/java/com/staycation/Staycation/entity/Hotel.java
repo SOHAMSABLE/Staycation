@@ -44,7 +44,7 @@ public class Hotel {
     private  Boolean active;
 
 
-    @ManyToOne
+    @ManyToOne(optional = false , fetch = FetchType.LAZY)
     private  User owner;
 
 

@@ -3,6 +3,8 @@ package com.staycation.Staycation.service;
 import com.staycation.Staycation.dto.HotelDto;
 import com.staycation.Staycation.dto.HotelInfoDto;
 
+import java.util.List;
+
 public interface HotelService {
 
     HotelDto createNewHotel(HotelDto hotelDto);
@@ -11,4 +13,6 @@ public interface HotelService {
     void deleteHotelById(Long id);
     void activateHotel(Long hotelId);
     HotelInfoDto getHotelInfoById(Long hotelId);
+
+    List<HotelDto> getAllHotels();
 }
