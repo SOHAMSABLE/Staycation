@@ -2,6 +2,7 @@ package com.staycation.Staycation.entity;
 import com.staycation.Staycation.entity.enums.BookingStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -56,6 +57,7 @@ public class Booking {
     private BookingStatus bookingStatus;
 
     @ManyToMany(fetch = FetchType.LAZY)
+//    @JsonIgnore
     @JoinTable(
         name = "booking_guests",
         joinColumns = @JoinColumn(name = "booking_id"),
@@ -65,4 +67,7 @@ public class Booking {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal amount;
+
+    @Column(unique = true)
+    private String paymentSessionId;
 }

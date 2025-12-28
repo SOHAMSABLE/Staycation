@@ -2,8 +2,8 @@ package com.staycation.Staycation.strategy;
 
 import com.staycation.Staycation.entity.Inventory;
 import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
+import java.util.List;
 
 @Service
 public class PricingService {
@@ -19,5 +19,10 @@ public class PricingService {
         pricingStrategy = new HolidayPricingStratgey(pricingStrategy);
 
         return pricingStrategy.calculatePrice(inventory);
+    }
+    public BigDecimal calculateTotalPrice(List<Inventory> inventoryList) {
+        return inventoryList.stream()
+                .map(this::calculateDynamicPricing)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 }
