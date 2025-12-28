@@ -17,16 +17,15 @@ public class Room {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-   @ManyToOne(fetch = FetchType.LAZY)
-   @JoinColumn(name = "hotel_id", nullable = false)
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;
 
-   @Column(nullable = false)
-   private  String type;
+    @Column(nullable = false)
+    private  String type;
 
-   @Column(nullable = false , precision = 10,scale = 2)
-   private BigDecimal basePrice;
+    @Column(nullable = false , precision = 10,scale = 2)
+    private BigDecimal basePrice;
 
     @Column(columnDefinition = "TEXT[]")
     private  String[] photos;

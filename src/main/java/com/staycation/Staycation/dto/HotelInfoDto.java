@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 @Data
 @AllArgsConstructor
-public class HotelInfoDto {
-    private HotelDto hotelDto;
+public class HotelInfoDto extends HotelDto {
+    private HotelDto hotel;
     private List<RoomDto> rooms;
 }

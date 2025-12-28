@@ -31,3 +31,15 @@ build/
 
 ### VS Code ###
 .vscode/
+
+# Ignore IDE files
+.idea/
+*.iml
+*.class
+
+# Ignore build output
+/target/
+
+# Ignore local configs
+src/main/resources/application.properties
+src/main/resources/application.yml

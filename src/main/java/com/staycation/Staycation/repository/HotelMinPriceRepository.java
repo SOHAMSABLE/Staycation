@@ -15,23 +15,47 @@ import java.util.Optional;
 @Repository
 public interface HotelMinPriceRepository extends JpaRepository<HotelMinPrice, Long> {
 
-    @Query("""
-    SELECT new com.staycation.Staycation.dto.HotelPriceDto(i.hotel, AVG(i.price))
-    FROM HotelMinPrice i
-    WHERE i.hotel.city = :city
-      AND i.date BETWEEN :startDate AND :endDate
-      AND i.hotel.active = true
-    GROUP BY i.hotel
+//    @Query("""
+//    SELECT new com.staycation.Staycation.dto.HotelPriceDto(
+//    i.hotel, AVG(i.price))
+//    FROM HotelMinPrice i
+//    WHERE i.hotel.city = :city
+//      AND i.date BETWEEN :startDate AND :endDate
+//      AND i.hotel.active = true
+//    GROUP BY i.hotel
+//""")
+//
+//    Page<HotelPriceDto> findHotelsWithAvailableInventory(
+//            @Param("city") String city,
+//            @Param("startDate") LocalDate startDate,
+//            @Param("endDate") LocalDate endDate,
+//            @Param("roomsCount") Integer roomsCount,
+//            @Param("dateCount") Long dateCount,
+//            Pageable pageable
+//    );
+@Query("""
+    SELECT new com.staycation.Staycation.dto.HotelPriceDto(
+        h.id,
+        h.name,
+        h.city,
+        AVG(hmp.price)
+    )
+    FROM HotelMinPrice hmp
+    JOIN hmp.hotel h
+    WHERE h.city = :city
+      AND hmp.date BETWEEN :startDate AND :endDate
+      AND h.active = true
+    GROUP BY h.id, h.name, h.city
 """)
+Page<HotelPriceDto> findHotelsWithAvailableInventory(
+        String city,
+        LocalDate startDate,
+        LocalDate endDate,
+        Integer roomsCount,
+        long dateCount,
+        Pageable pageable
+);
 
-    Page<HotelPriceDto> findHotelsWithAvailableInventory(
-            @Param("city") String city,
-            @Param("startDate") LocalDate startDate,
-            @Param("endDate") LocalDate endDate,
-            @Param("roomsCount") Integer roomsCount,
-            @Param("dateCount") Long dateCount,
-            Pageable pageable
-    );
 
     Optional<HotelMinPrice> findByHotelAndDate(Hotel hotel, LocalDate date);
 }

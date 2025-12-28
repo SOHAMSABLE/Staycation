@@ -2,9 +2,9 @@ package com.staycation.Staycation.strategy;
 
 import com.staycation.Staycation.entity.Inventory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-
 @RequiredArgsConstructor
 public class OccupanyPricingStrategy implements PricingStrategy {
 
