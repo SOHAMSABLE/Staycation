@@ -1,8 +1,12 @@
 package com.staycation.Staycation.service;
 import com.staycation.Staycation.dto.HotelPriceDto;
 import com.staycation.Staycation.dto.HotelSearchRequest;
+import com.staycation.Staycation.dto.InventoryDto;
+import com.staycation.Staycation.dto.UpdateInventoryRequestDto;
 import com.staycation.Staycation.entity.Room;
 import org.springframework.data.domain.Page;
+
+import java.util.List;
 
 public interface InventoryService {
 
@@ -12,4 +16,7 @@ public interface InventoryService {
 
     Page<HotelPriceDto> searchHotels(HotelSearchRequest hotelSearchRequest);
 
+    List<InventoryDto> getAllInventoryByRoom(Long roomId);
+
+    void updateInventory(Long roomId, UpdateInventoryRequestDto updateInventoryRequestDto);
 }
