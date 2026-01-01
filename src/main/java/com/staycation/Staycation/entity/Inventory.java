@@ -1,5 +1,6 @@
 package com.staycation.Staycation.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -56,6 +57,7 @@ public class Inventory {
     private String city;
 
     @Column(nullable = false)
+    @JsonProperty("closed")
     private Boolean closed;
 
     @CreationTimestamp

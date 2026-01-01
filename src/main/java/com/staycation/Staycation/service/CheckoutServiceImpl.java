@@ -44,7 +44,7 @@ public class CheckoutServiceImpl implements CheckOutService {
                                     .setQuantity(1L)
                                     .setPriceData(
                                             SessionCreateParams.LineItem.PriceData.builder()
-                                                    .setCurrency("inr")
+                                                    .setCurrency("usd")
                                                     .setUnitAmount(booking.getAmount().multiply(BigDecimal.valueOf(100)).longValue())
                                                     .setProductData(
                                                             SessionCreateParams.LineItem.PriceData.ProductData.builder()

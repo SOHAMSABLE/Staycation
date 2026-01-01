@@ -1,9 +1,12 @@
 package com.staycation.Staycation.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.staycation.Staycation.entity.enums.Gender;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.time.LocalDate;
 
 @Entity
 @Getter
@@ -17,6 +20,7 @@ public class Guest {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private User user;
 
     @Column(nullable = false)
@@ -26,4 +30,6 @@ public class Guest {
     private Gender gender;
 
     private Integer age;
+
+    private LocalDate dateOfBirth;
 }

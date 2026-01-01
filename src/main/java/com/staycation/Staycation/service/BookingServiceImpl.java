@@ -3,6 +3,7 @@ package com.staycation.Staycation.service;
 import com.staycation.Staycation.dto.BookingDto;
 import com.staycation.Staycation.dto.BookingRequest;
 import com.staycation.Staycation.dto.GuestDto;
+import com.staycation.Staycation.dto.HotelReportDto;
 import com.staycation.Staycation.entity.*;
 import com.staycation.Staycation.entity.enums.BookingStatus;
 import com.staycation.Staycation.exception.ResourceNotFoundException;
@@ -15,18 +16,28 @@ import com.stripe.model.Event;
 import com.stripe.model.Refund;
 import com.stripe.param.RefundCreateParams;
 import com.stripe.model.checkout.Session;
+import com.sun.source.tree.LambdaExpressionTree;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+//import java.nio.file.AccessDeniedException;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+
+import static com.staycation.Staycation.utils.AppUtils.getCurrentUser;
 
 
 @Service
@@ -69,11 +80,23 @@ public class BookingServiceImpl implements BookingService{
         }
 
         // Reserve the room/ update the booked count of inventories
+
+//        for(Inventory inventory: inventoryList){
+//            inventory.setReservedCount(inventory.getReservedCount()+ bookingRequest.getRoomsCount());
+//        }
+//
+//        inventoryRepository.saveAll(inventoryList);
+
+
         inventoryRepository.initBooking(room.getId(), bookingRequest.getCheckInDate(),
                 bookingRequest.getCheckOutDate(), bookingRequest.getRoomsCount());
 
         BigDecimal priceForOneRoom = pricingService.calculateTotalPrice(inventoryList);
         BigDecimal totalPrice = priceForOneRoom.multiply(BigDecimal.valueOf(bookingRequest.getRoomsCount()));
+
+//        User user = new User();
+//        user.setId(1L);
+
 
         Booking booking = Booking.builder()
                 .bookingStatus(BookingStatus.RESERVED)
@@ -83,9 +106,9 @@ public class BookingServiceImpl implements BookingService{
                 .checkOutDate(bookingRequest.getCheckOutDate())
                 .user(getCurrentUser())
                 .roomsCount(bookingRequest.getRoomsCount())
-                .amount(totalPrice)
+                .amount(BigDecimal.valueOf(totalPrice.doubleValue()))
                 .build();
-
+//
         booking = bookingRepository.save(booking);
         return modelMapper.map(booking, BookingDto.class);
     }
@@ -100,8 +123,22 @@ public class BookingServiceImpl implements BookingService{
                 new ResourceNotFoundException("Booking not found with id: "+bookingId));
         User user = getCurrentUser();
 
-        if (!user.equals(booking.getUser())) {
-            throw new UnAuthorisedException("Booking does not belong to this user with id: "+user.getId());
+        log.info("AUTH USER ID       : {}", user.getId());
+        log.info("BOOKING USER ID    : {}", booking.getUser().getId());
+        log.info("AUTH USER EMAIL    : {}", user.getEmail());
+        log.info("BOOKING USER EMAIL : {}", booking.getUser().getEmail());
+        log.info("Equals check: {}", getCurrentUser().equals(booking.getUser()));
+
+
+//        if (!user.equals(booking.getUser())) {
+//            throw new UnAuthorisedException("Booking does not belong to this user with id: "+user.getId());
+//        }
+
+
+        if (!user.getId().equals(booking.getUser().getId())) {
+            throw new UnAuthorisedException(
+                    "Booking does not belong to this user with id: " + user.getId()
+            );
         }
 
         if (hasBookingExpired(booking)) {
@@ -114,10 +151,15 @@ public class BookingServiceImpl implements BookingService{
 
         for (GuestDto guestDto: guestDtoList) {
             Guest guest = modelMapper.map(guestDto, Guest.class);
-            guest.setUser(user);
+            guest.setUser(getCurrentUser());
             guest = guestRepository.save(guest);
             booking.getGuests().add(guest);
         }
+//        for (Long guestId: guestIdList) {
+//            Guest guest = guestRepository.findById(guestId)
+//                    .orElseThrow(() -> new ResourceNotFoundException("Guest not found with id: "+guestId));
+//            booking.getGuests().add(guest);
+//        }
 
         booking.setBookingStatus(BookingStatus.GUESTS_ADDED);
         booking = bookingRepository.save(booking);
@@ -131,8 +173,10 @@ public class BookingServiceImpl implements BookingService{
                 ()-> new ResourceNotFoundException("Booking not found with id:"+ bookingId)
         );
         User user = getCurrentUser();
-        if (!user.equals(booking.getUser())) {
-            throw new UnAuthorisedException("Booking does not belong to this user with id: "+user.getId());
+        if (!user.getId().equals(booking.getUser().getId())) {
+            throw new UnAuthorisedException(
+                    "Booking does not belong to this user with id: " + user.getId()
+            );
         }
 
         if (hasBookingExpired(booking)) {
@@ -179,8 +223,10 @@ public class BookingServiceImpl implements BookingService{
                 () -> new ResourceNotFoundException("Booking not found with id: "+bookingId)
         );
         User user = getCurrentUser();
-        if (!user.equals(booking.getUser())) {
-            throw new UnAuthorisedException("Booking does not belong to this user with id: "+user.getId());
+        if (!user.getId().equals(booking.getUser().getId())) {
+            throw new UnAuthorisedException(
+                    "Booking does not belong to this user with id: " + user.getId()
+            );
         }
 
         if(booking.getBookingStatus() != BookingStatus.CONFIRMED) {
@@ -216,19 +262,87 @@ public class BookingServiceImpl implements BookingService{
                 () -> new ResourceNotFoundException("Booking not found with id: "+bookingId)
         );
         User user = getCurrentUser();
-        if (!user.equals(booking.getUser())) {
-            throw new UnAuthorisedException("Booking does not belong to this user with id: "+user.getId());
+        if (!user.getId().equals(booking.getUser().getId())) {
+            throw new UnAuthorisedException(
+                    "Booking does not belong to this user with id: " + user.getId()
+            );
         }
 
         return booking.getBookingStatus();
+    }
+
+    @Override
+    public List<BookingDto> getAllBookingsByHotelId(Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new ResourceNotFoundException("Hotel not found with this id" +hotelId));
+
+        User user = getCurrentUser();
+
+
+        log.info("Current User ID: {} | Hotel Owner ID: {}", user.getId(), hotel.getOwner().getId());
+        log.info("Are objects same? {}", user.equals(hotel.getOwner()));
+//        if(!user.equals(hotel.getOwner())) throw new AccessDeniedException("You're not the owner of the hotel with id:"+ hotelId);
+        if (!user.getId().equals(hotel.getOwner().getId())) {
+            throw new AccessDeniedException(
+                    "You're not the owner of the hotel with id: " + hotelId
+            );
+        }
+
+        log.info("Getting all bookings for the hotel with ID: {} ", hotelId);
+        List<Booking> bookings = bookingRepository.findByHotel(hotel);
+        return bookings
+                .stream()
+                .map((element) -> modelMapper.map(element, BookingDto.class)).collect(Collectors.toList());
+
+    }
+
+    @Override
+    public HotelReportDto getHotelReport(Long hotelId, LocalDate startDate, LocalDate endDate) {
+        Hotel hotel = hotelRepository.findById(hotelId).orElseThrow(() -> new ResourceNotFoundException("Hotel not found with this id" +hotelId));
+
+        User user = getCurrentUser();
+
+        log.info("Generating report for hotel with ID: {} ", hotelId);
+
+        if (!user.getId().equals(hotel.getOwner().getId())) {
+            throw new AccessDeniedException(
+                    "You're not the owner of the hotel with id: " + hotelId
+            );
+        }
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+
+        List<Booking> bookings = bookingRepository.findByHotelAndCreatedAtBetween(hotel, startDateTime, endDateTime);
+
+        Long totalConfirmedBookings = bookings
+                .stream()
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+                .count();
+
+        BigDecimal totalRevenueOfConfirmedBookings = bookings.stream()
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+                .map(Booking :: getAmount)
+                .reduce(BigDecimal.ZERO,BigDecimal::add);
+
+        BigDecimal avgRevenue = totalConfirmedBookings == 0 ? BigDecimal.ZERO :
+                totalRevenueOfConfirmedBookings.divide(BigDecimal.valueOf(totalConfirmedBookings), RoundingMode.HALF_UP);
+
+        return new HotelReportDto(totalConfirmedBookings, totalRevenueOfConfirmedBookings, avgRevenue);
+    }
+
+    @Override
+    public List<BookingDto> getMyBookings() {
+        User user = getCurrentUser();
+
+        return bookingRepository.findByUser(user)
+                .stream().
+                map((element) -> modelMapper.map(element, BookingDto.class))
+                .collect(Collectors.toList());
     }
 
     public boolean hasBookingExpired(Booking booking) {
         return booking.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now());
     }
 
-    public User getCurrentUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-    }
 }
 

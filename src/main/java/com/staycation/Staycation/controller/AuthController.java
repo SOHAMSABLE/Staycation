@@ -43,8 +43,8 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponseDto> refresh(HttpServletRequest request) {
-        String refreshToken = Arrays.stream(request.getCookies()).
+    public ResponseEntity<LoginResponseDto> refresh(HttpServletRequest httpServletRequest) {
+        String refreshToken = Arrays.stream(httpServletRequest.getCookies()).
                 filter(cookie -> "refreshToken".equals(cookie.getName()))
                 .findFirst()
                 .map(Cookie::getValue)

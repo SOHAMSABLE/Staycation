@@ -7,6 +7,7 @@ import com.staycation.Staycation.entity.enums.BookingStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Set;
 @Data
@@ -16,9 +17,9 @@ public class BookingDto {
 
     private Integer roomsCount;
 
-    private LocalDateTime checkInDate;
+    private LocalDate checkInDate;
 
-    private LocalDateTime checkOutDate;
+    private LocalDate checkOutDate;
 
     private LocalDateTime createdAt;
 

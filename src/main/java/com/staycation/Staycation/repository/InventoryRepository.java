@@ -131,7 +131,7 @@ public interface InventoryRepository extends JpaRepository<Inventory,Long> {
                                                     @Param("startDate") LocalDate startDate,
                                                     @Param("endDate") LocalDate endDate);
 
-    @Modifying
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
                 UPDATE Inventory i
                 SET i.surgeFactor = :surgeFactor,
@@ -146,19 +146,17 @@ public interface InventoryRepository extends JpaRepository<Inventory,Long> {
                          @Param("surgeFactor") BigDecimal surgeFactor);
 
     @Query("""
-       SELECT new com.codingshuttle.projects.airBnbApp.dto.RoomPriceDto(
+       SELECT new com.staycation.Staycation.dto.RoomPriceDto(
             i.room,
-            CASE
-                WHEN COUNT(i) = :dateCount THEN AVG(i.price)
-                ELSE NULL
-            END
-        )
+            AVG(i.price)
+       )
        FROM Inventory i
        WHERE i.hotel.id = :hotelId
              AND i.date BETWEEN :startDate AND :endDate
              AND (i.totalCount - i.bookedCount) >= :roomsCount
              AND i.closed = false
        GROUP BY i.room
+       HAVING COUNT(i) = :dateCount
        """)
     List<RoomPriceDto> findRoomAveragePrice(
             @Param("hotelId") Long hotelId,
